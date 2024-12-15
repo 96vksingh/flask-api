@@ -1,0 +1,527 @@
+openapi: 3.0.0
+info:
+  title: Codingspheres APIs
+  description: Provides APIs documentation
+  version: "1.0"
+servers:
+  - url: https://codingsphere-811368486283.us-central1.run.app  # Update with your server's base URL
+paths:
+  /v1/login:
+    post:
+      summary: User login
+      description: Authenticate the user and return access and refresh tokens.
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: "user@example.com"
+                password:
+                  type: string
+                  example: "password123"
+      responses:
+        200:
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Login successful"
+                  access_token:
+                    type: string
+                  refresh_token:
+                    type: string
+        401:
+          description: Invalid email or password
+        500:
+          description: Failed to log in
+
+  /v1/refresh:
+    post:
+      summary: Refresh access token
+      description: Generate a new access token using a valid refresh token.
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refresh_token:
+                  type: string
+                  example: "your-refresh-token-here"
+      responses:
+        200:
+          description: Token refreshed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+        400:
+          description: Refresh token is required
+        401:
+          description: Invalid or expired refresh token
+        500:
+          description: Failed to refresh token
+
+  /v1/logout:
+    post:
+      summary: Logout user
+      description: Invalidate the refresh token to log out the user.
+      tags:
+        - Authentication
+      security:
+        - BearerAuth: []
+      responses:
+        200:
+          description: Logout successful
+        401:
+          description: Unauthorized, token required
+        500:
+          description: Failed to log out
+
+  /api/v1/users:
+    post:
+      summary: Create a new user
+      description: Create a new user in the system. Requires admin privileges.
+      tags:
+        - Users
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                first_name:
+                  type: string
+                  example: John
+                last_name:
+                  type: string
+                  example: Doe
+                email:
+                  type: string
+                  example: john.doe@example.com
+                password:
+                  type: string
+                  example: Password123
+                phone:
+                  type: string
+                  example: 1234567890
+                role:
+                  type: string
+                  example: admin
+                status:
+                  type: string
+                  example: active
+      responses:
+        201:
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: User created successfully
+                  user:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      first_name:
+                        type: string
+                      last_name:
+                        type: string
+                      email:
+                        type: string
+                      role:
+                        type: string
+                      status:
+                        type: string
+        400:
+          description: Missing required fields or invalid data
+        409:
+          description: Email already exists
+        500:
+          description: Failed to create user
+
+    get:
+      summary: Get all users
+      description: Fetch a list of users with optional filters for status and role.
+      tags:
+        - Users
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          description: Filter by user status
+          schema:
+            type: string
+        - name: role
+          in: query
+          description: Filter by user role
+          schema:
+            type: string
+        - name: page
+          in: query
+          description: Page number for pagination
+          schema:
+            type: integer
+            example: 1
+        - name: limit
+          in: query
+          description: Number of results per page
+          schema:
+            type: integer
+            example: 20
+      responses:
+        200:
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  users:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        first_name:
+                          type: string
+                        last_name:
+                          type: string
+                        email:
+                          type: string
+                        role:
+                          type: string
+                        status:
+                          type: string
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                  total_count:
+                    type: integer
+                    example: 100
+        500:
+          description: Failed to fetch users
+
+  /api/v1/users/{user_id}:
+    get:
+      summary: Get user by ID
+      description: Retrieve details of a specific user by their ID.
+      tags:
+        - Users
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          description: ID of the user to retrieve
+          schema:
+            type: string
+      responses:
+        200:
+          description: User details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      first_name:
+                        type: string
+                      last_name:
+                        type: string
+                      email:
+                        type: string
+                      role:
+                        type: string
+                      status:
+                        type: string
+                      created_at:
+                        type: string
+                        format: date-time
+                      updated_at:
+                        type: string
+                        format: date-time
+        404:
+          description: User not found
+        500:
+          description: Failed to fetch user
+  
+  /api/v1/projects:
+      post:
+        summary: Create a new project
+        description: Endpoint to create a new project.
+        tags:
+          - Projects
+        security:
+          - BearerAuth: []
+        requestBody:
+          description: Project data to create a new project
+          required: true
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+                    description: Name of the project
+                    example: New Project
+                  description:
+                    type: string
+                    description: Description of the project
+                    example: This is a test project
+                  status:
+                    type: string
+                    description: Status of the project
+                    enum: [active, inactive]
+                    example: active
+        responses:
+          '201':
+            description: Project created successfully
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+                      example: Project created successfully
+                    project:
+                      $ref: '#/components/schemas/Project'
+          '400':
+            description: Validation error
+          '401':
+            description: Unauthorized
+          '500':
+            description: Internal server error
+      get:
+        summary: Get all projects
+        description: Retrieve a list of all projects with optional filters and pagination.
+        tags:
+          - Projects
+        security:
+          - BearerAuth: []
+        parameters:
+          - name: status
+            in: query
+            description: Filter projects by status
+            schema:
+              type: string
+              enum: [active, inactive]
+          - name: page
+            in: query
+            description: Page number for pagination
+            schema:
+              type: integer
+              example: 1
+          - name: limit
+            in: query
+            description: Number of items per page
+            schema:
+              type: integer
+              example: 20
+        responses:
+          '200':
+            description: List of projects retrieved successfully
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    projects:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Project'
+                    total_count:
+                      type: integer
+                      example: 50
+          '401':
+            description: Unauthorized
+          '500':
+            description: Internal server error
+
+  /api/v1/projects/{project_id}:
+      get:
+        summary: Get project details
+        description: Retrieve details of a specific project by ID.
+        tags:
+          - Projects
+        security:
+          - BearerAuth: []
+        parameters:
+          - name: project_id
+            in: path
+            required: true
+            description: The ID of the project
+            schema:
+              type: string
+              example: 6475d9df58c5eec16792a234
+        responses:
+          '200':
+            description: Project details retrieved successfully
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Project'
+          '404':
+            description: Project not found
+          '401':
+            description: Unauthorized
+          '500':
+            description: Internal server error
+      patch:
+        summary: Update a project
+        description: Update details of a specific project by ID.
+        tags:
+          - Projects
+        security:
+          - BearerAuth: []
+        parameters:
+          - name: project_id
+            in: path
+            required: true
+            description: The ID of the project to update
+            schema:
+              type: string
+              example: 6475d9df58c5eec16792a234
+        requestBody:
+          description: Data to update the project
+          required: true
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+                    description: Updated project name
+                    example: Updated Project
+                  description:
+                    type: string
+                    description: Updated project description
+                    example: Updated description
+                  status:
+                    type: string
+                    description: Updated status of the project
+                    enum: [active, inactive]
+                    example: inactive
+        responses:
+          '200':
+            description: Project updated successfully
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+                      example: Project updated successfully
+                    project:
+                      $ref: '#/components/schemas/Project'
+          '404':
+            description: Project not found
+          '401':
+            description: Unauthorized
+          '500':
+            description: Internal server error
+      delete:
+        summary: Delete a project
+        description: Delete a specific project by ID.
+        tags:
+          - Projects
+        security:
+          - BearerAuth: []
+        parameters:
+          - name: project_id
+            in: path
+            required: true
+            description: The ID of the project to delete
+            schema:
+              type: string
+              example: 6475d9df58c5eec16792a234
+        responses:
+          '200':
+            description: Project deleted successfully
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+                      example: Project deleted successfully
+          '404':
+            description: Project not found
+          '401':
+            description: Unauthorized
+          '500':
+            description: Internal server error
+
+components:
+  schemas:
+    Project:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 6475d9df58c5eec16792a234
+        name:
+          type: string
+          example: Sample Project
+        description:
+          type: string
+          example: This is a sample project description
+        user_id:
+          type: string
+          example: 6475d9df58c5eec16792a233
+        status:
+          type: string
+          enum: [active, inactive]
+          example: active
+        created_at:
+          type: string
+          format: date-time
+          example: "2023-01-01T00:00:00Z"
+        updated_at:
+          type: string
+          format: date-time
+          example: "2023-01-01T00:00:00Z"
+
+securitySchemes:
+  BearerAuth:
+    type: http
+    scheme: bearer
+    bearerFormat: JWT

@@ -1,0 +1,13 @@
+steps:
+  - name: 'gcr.io/cloud-builders/gcloud'
+    timeout: '540s'
+    args: ['functions', 'deploy', 'codingsphere','--project', 'cpss-444808', '--runtime', 'python39', '--trigger-http', '--allow-unauthenticated', '--source', '.','--max-instances', '1','--memory', '256MB']
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'gcr.io/cpss-444808/codingsphere:latest', '.']
+    dir: '.'
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/cpss-444808/codingsphere:latest']
+
+timeout: '3600s'
