@@ -9,9 +9,4 @@ pytz
 # Flask
 Flask-Swagger
 PyJWT
-# awslambdaric
-# awsgi
-# mangum
-# flask-lambda
-# serverless-wsgi>=2.0.2
 requests>=2.25.1

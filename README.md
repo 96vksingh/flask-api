@@ -89,8 +89,9 @@ Follow these steps to set up and run the project locally:
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/your-repo/project.git
-   cd project
+   git clone https://github.com/96vksingh/flask-api
+   cd flask-api
+   ```
 
 
 ## run in local env
